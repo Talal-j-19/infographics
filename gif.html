@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>BST Deletion Visualization</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <style>
+    body { font-family: sans-serif; margin: 0; }
+    svg { width: 100%; height: 600px; }
+    .node circle { fill: #4caf50; stroke: #333; stroke-width: 2px; }
+    .node text { fill: white; font-size: 14px; }
+    .highlight { fill: #f44336 !important; }
+    #explanation {
+      padding: 10px 20px;
+      font-size: 16px;
+      background: #f9f9f9;
+      border-top: 1px solid #ddd;
+    }
+  </style>
+</head>
+<body>
+
+<svg></svg>
+<div id="explanation">Click a node to delete it and watch what happens...</div>
+
+<script>
+const treeData = {
+  name: 50,
+  children: [
+    {
+      name: 30,
+      children: [
+        { name: 20 },
+        { name: 40 }
+      ]
+    },
+    {
+      name: 70,
+      children: [
+        { name: 60 },
+        { name: 80 }
+      ]
+    }
+  ]
+};
+
+let svg = d3.select("svg"),
+    width = window.innerWidth,
+    height = 600,
+    g = svg.append("g").attr("transform", "translate(40,40)");
+
+let duration = 750;
+let root = d3.hierarchy(treeData, d => d.children);
+let treeLayout = d3.tree().size([width - 100, height - 100]);
+
+update(root);
+
+function update(source) {
+  const treeData = treeLayout(root);
+  const nodes = treeData.descendants();
+  const links = treeData.links();
+
+  g.selectAll(".link").remove();
+  g.selectAll(".node").remove();
+
+  g.selectAll(".link")
+    .data(links)
+    .enter()
+    .append("path")
+    .attr("class", "link")
+    .attr("fill", "none")
+    .attr("stroke", "#ccc")
+    .attr("stroke-width", 2)
+    .attr("d", d3.linkVertical()
+      .x(d => d.x)
+      .y(d => d.y));
+
+  const node = g.selectAll(".node")
+    .data(nodes, d => d.data.name)
+    .enter()
+    .append("g")
+    .attr("class", "node")
+    .attr("transform", d => `translate(${d.x},${d.y})`)
+    .on("click", handleDelete);
+
+  node.append("circle")
+    .attr("r", 20);
+
+  node.append("text")
+    .attr("dy", 5)
+    .attr("text-anchor", "middle")
+    .text(d => d.data.name);
+}
+
+function handleDelete(event, d) {
+  d3.select("#explanation").text(`Attempting to delete node ${d.data.name}...`);
+  animateDelete(d);
+}
+
+function animateDelete(d) {
+  const parent = d.parent;
+  const children = d.children || [];
+
+  if (!children.length) {
+    d3.select("#explanation").text(`Node ${d.data.name} is a leaf. Simply remove it.`);
+    if (parent) {
+      parent.data.children = parent.data.children.filter(c => c.name !== d.data.name);
+    } else {
+      d.data = {};
+    }
+  } else if (children.length === 1) {
+    d3.select("#explanation").text(`Node ${d.data.name} has one child. Replace it with its child.`);
+    const child = children[0];
+    if (parent) {
+      const idx = parent.data.children.findIndex(c => c.name === d.data.name);
+      parent.data.children[idx] = child.data;
+    } else {
+      root = d3.hierarchy(child.data);
+    }
+  } else {
+    d3.select("#explanation").text(`Node ${d.data.name} has two children. Find in-order successor.`);
+    const successor = findMin(d.children[1]);
+    d3.select("#explanation").text(`Replacing ${d.data.name} with in-order successor ${successor.data.name}.`);
+    d.data.name = successor.data.name;
+    removeNode(d.children[1], successor.data.name);
+  }
+
+  setTimeout(() => {
+    root = d3.hierarchy(treeData, d => d.children);
+    update(root);
+  }, 1500);
+}
+
+function findMin(node) {
+  return node.children && node.children[0] ? findMin(node.children[0]) : node;
+}
+
+function removeNode(subtree, name) {
+  if (!subtree || !subtree.children) return;
+  subtree.children = subtree.children.filter(c => c.name !== name);
+  subtree.children.forEach(child => removeNode(child, name));
+}
+</script>
+
+</body>
+</html>
