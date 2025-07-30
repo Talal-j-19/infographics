@@ -2,189 +2,154 @@ from manim import *
 
 class Scene(Scene):
     def construct(self):
-        # Configuration and Custom Color Palette
-        COLOR_PALETTE = {
-            "primary": "#4285F4",  # Manim Blue / Google Blue
-            "secondary": "#34A853", # Manim Green / Google Green
-            "accent": "#EA4335",   # Manim Red / Google Red
-            "text": WHITE,
-            "subtext": LIGHT_GRAY,
-            "box_bg": "#2C3E50",   # Darker Blue/Gray for stage boxes
-            "arrow": YELLOW_A,     # Bright arrow color
-            "start_end_node": "#FBB03B", # Orange/Gold for start/end nodes
-            "icon1": BLUE_C,
-            "icon2": GREEN_C,
-            "icon3": PURPLE_C,
-            "icon4": RED_C,
-            "tip_bg": "#3A3A3A",   # Darker gray for tips background
-            "tip_heading": YELLOW_E, # Bright yellow for tip headings
-        }
+        # 0. Configuration
+        self.camera.background_color = "#202020" # Dark background
 
-        stage_box_color = COLOR_PALETTE["box_bg"]
-        stage_fill_opacity = 0.9
-        stage_corner_radius = 0.2
-        arrow_color = COLOR_PALETTE["arrow"]
-        text_color = COLOR_PALETTE["text"]
-        heading_color = COLOR_PALETTE["primary"]
-        subtext_color = COLOR_PALETTE["subtext"]
+        # Define custom colors using hex codes
+        COLOR_TITLE = "#ADD8E6" # Light Blue
+        COLOR_STEP_1 = "#5DADE2" # Blue
+        COLOR_STEP_2 = "#52BE80" # Green
+        COLOR_STEP_3 = "#F4D03F" # Yellow
+        COLOR_STEP_4 = "#EB984E" # Orange
+        COLOR_STEP_5 = "#E74C3C" # Red
+        COLOR_TEXT = "#FFFFFF"   # White
+        COLOR_DETAILS = "#B0B0B0" # Light Gray
+        COLOR_ARROW = "#808080"  # Gray
+        COLOR_TIP_BOX = "#F7DC6F" # Yellow for tip
 
-        # Adjusted Font Sizes for better fit and readability
-        title_font_size = 32 # Reduced from 36
-        stage_label_font_size = 18 # Reduced from 20
-        concept_font_size = 13 # Reduced from 14
-        tip_text_font_size = 12 # Reduced from 13
-        node_label_font_size = 14 # Reduced from 16
+        # 1. Main Title
+        title = Text("Roadmap to Learn AI", font_size=36, color=COLOR_TITLE, weight="BOLD") 
+        
+        # 2. Define Step Properties
+        box_padding_x = 0.3 
+        box_padding_y = 0.2 
+        min_box_width = 8.5 
+        box_radius = 0.2
+        arrow_tip_length = 0.2
+        vertical_step_buff = 0.8 # Increased buff for more space between steps
+        vertical_group_buff = 1.0 # Increased buff for more space between main sections
 
-        # --- Title ---
-        title = Text("The Journey to Coding Mastery", font_size=title_font_size, color=heading_color, weight=BOLD)
-        title.to_edge(UP, buff=0.2) # Reduced buff from 0.3
+        # 3. Step Information
+        step_data = [
+            {
+                "title": "Foundations",
+                "details": "Math (Lin Alg, Calc, Stats), Python (Libraries), DS&A",
+                "color": COLOR_STEP_1,
+                "icon_tex": r"$\sum$" # Summation symbol for math/foundations
+            },
+            {
+                "title": "Machine Learning",
+                "details": "Supervised, Unsupervised, Regression, Classification, Clustering",
+                "color": COLOR_STEP_2,
+                "icon_tex": r"$\approx$" # Approximation symbol for modeling
+            },
+            {
+                "title": "Deep Learning & Frameworks",
+                "details": "Neural Networks, CNNs, RNNs, Transformers, PyTorch/TF", 
+                "color": COLOR_STEP_3,
+                "icon_tex": r"$\psi$" # Psi, abstract for deep learning
+            },
+            {
+                "title": "Specialization",
+                "details": "NLP (Natural Language Processing), CV (Computer Vision), RL (Reinforcement Learning), GenAI", 
+                "color": COLOR_STEP_4,
+                "icon_tex": r"$\star$" # Star for specialization/niche
+            },
+            {
+                "title": "Projects & Portfolio",
+                "details": "Kaggle, GitHub, Personal Projects, Blog, Portfolio Building", 
+                "color": COLOR_STEP_5,
+                "icon_tex": r"$\checkmark$" # Checkmark for completion/achievement
+            }
+        ]
 
-        # --- Helper function for stages ---
-        def create_stage_box(label_text, concepts_list, icon_mob, icon_color):
-            icon_mob.set_height(0.6).set_color(icon_color)
-            label = Text(label_text, font_size=stage_label_font_size, color=text_color, weight=BOLD)
+        # Create all individual step Mobjects (rectangle + text content)
+        individual_steps = []
+        for data in step_data:
+            # Create icon and title
+            icon = Tex(data["icon_tex"], font_size=24, color=COLOR_TEXT) 
+            title_text = Text(data["title"], font_size=24, color=COLOR_TEXT, weight="BOLD") 
+            
+            # Group icon and title horizontally
+            icon_and_title = Group(icon, title_text).arrange(RIGHT, buff=0.15, aligned_edge=LEFT) 
+            
+            # Create details text, wrapping within a specific width
+            details_text = Text(
+                data["details"], 
+                font_size=14, # Reduced font size for better fit
+                color=COLOR_DETAILS, 
+                line_spacing=1.2,
+                max_width=min_box_width - 2 * box_padding_x 
+            )
 
-            # Create a VGroup for concepts, with bullet points and left-aligned
-            concepts_mob = VGroup(*[Text(f"• {c}", font_size=concept_font_size, color=subtext_color) for c in concepts_list])
-            concepts_mob.arrange(DOWN, buff=0.1, aligned_edge=LEFT) 
+            # Group all text content vertically
+            text_vgroup = VGroup(icon_and_title, details_text).arrange(DOWN, buff=0.15, aligned_edge=LEFT) 
+            
+            # Calculate rectangle dimensions based on text content and padding
+            current_box_width = max(min_box_width, text_vgroup.width + 2 * box_padding_x)
+            current_box_height = text_vgroup.height + 2 * box_padding_y
 
-            # Arrange icon, label, and concepts_mob as a column, centered horizontally
-            content_column = VGroup(icon_mob, label, concepts_mob).arrange(DOWN, buff=0.08, center=True) # Reduced buff from 0.15
+            rect = RoundedRectangle(
+                width=current_box_width,
+                height=current_box_height,
+                corner_radius=box_radius,
+                stroke_color=data["color"],
+                fill_color=data["color"],
+                fill_opacity=0.15,
+                stroke_width=3
+            )
+            
+            # Position the text_vgroup inside the rectangle
+            text_vgroup.align_to(rect.get_corner(UL) + RIGHT * box_padding_x + DOWN * box_padding_y, UL)
 
-            # Create a rectangle around the content
-            rect = SurroundingRectangle(content_column, buff=0.1, color=stage_box_color, fill_opacity=stage_fill_opacity, corner_radius=stage_corner_radius) # Reduced buff from 0.2
+            # Group rectangle and text for the step
+            step_group = VGroup(rect, text_vgroup)
+            individual_steps.append(step_group)
+        
+        # Arrange all steps vertically, centered
+        steps_vgroup = VGroup(*individual_steps).arrange(DOWN, buff=vertical_step_buff, center=True)
 
-            # Position the content column precisely at the center of the rectangle
-            # This move_to is technically redundant if SurroundingRectangle auto-centers, but harmless.
-            content_column.move_to(rect.get_center()) 
+        # Create arrows between arranged steps.
+        list_of_arrows = []
+        for i in range(len(steps_vgroup.submobjects) - 1):
+            start_rect = steps_vgroup.submobjects[i][0]
+            end_rect = steps_vgroup.submobjects[i+1][0]
+            arrow = Arrow(
+                start=start_rect.get_bottom(), 
+                end=end_rect.get_top(),   
+                color=COLOR_ARROW,
+                tip_length=arrow_tip_length,
+                stroke_width=3.5
+            )
+            list_of_arrows.append(arrow)
+        arrows = VGroup(*list_of_arrows)
 
-            return VGroup(rect, content_column)
-
-        # --- Stages ---
-
-        # Stage 0: Start
-        start_text = Text("START", font_size=node_label_font_size, color=COLOR_PALETTE["start_end_node"], weight=BOLD)
-
-        # Stage 1: Foundations
-        foundations = create_stage_box(
-            "1. Foundations",
-            ["Logic & Control Flow", "Variables & Data Types"],
-            Tex(r"$\langle/\rangle$").scale(1.2), COLOR_PALETTE["icon1"]
+        # 4. Concluding note/tip
+        tip_rect = RoundedRectangle(
+            width=min_box_width, 
+            height=1.6, 
+            corner_radius=0.2,
+            stroke_color=COLOR_TIP_BOX, fill_color=COLOR_TIP_BOX, fill_opacity=0.15, stroke_width=3
         )
-
-        # Stage 2: Core Concepts (Reduced to 2 concepts for space)
-        core_concepts = create_stage_box(
-            "2. Core Concepts",
-            ["Functions & Modularity", "Data Structures"], # Removed "Algorithms Basics"
-            Tex(r"$\Sigma$").scale(1.2), COLOR_PALETTE["icon2"]
-        )
-
-        # Stage 3: Applied Development
-        applied_dev = create_stage_box(
-            "3. Applied Development",
-            ["Version Control (Git)", "Web/API Development", "Databases Basics"],
-            Tex(r"$\{\!\!\}$").scale(1.2), COLOR_PALETTE["icon3"]
-        )
-
-        # Stage 4: Advanced & Specialization (Reduced to 2 concepts for space)
-        advanced_topics = create_stage_box(
-            "4. Advanced & Specialization",
-            ["Software Architecture", "System Design"], # Removed "Performance & Security"
-            Tex(r"$\infty$").scale(1.2), COLOR_PALETTE["icon4"]
-        )
-
-        # Final Goal
-        goal_text = Text("MASTERY", font_size=node_label_font_size, color=COLOR_PALETTE["start_end_node"], weight=BOLD)
+        tip_text = Text(
+            "Continuous learning & hands-on projects are key!",
+            font_size=14, # Reduced font size for better fit
+            color=COLOR_TIP_BOX,
+            weight="BOLD",
+            line_spacing=1.2,
+            max_width=tip_rect.width - 2*box_padding_x 
+        ).move_to(tip_rect.get_center())
         
-        # Arrange all stage boxes and start/goal text vertically
-        main_flow = VGroup(start_text, foundations, core_concepts, applied_dev, advanced_topics, goal_text)
-        main_flow.arrange(DOWN, buff=0.25, center=True) # Reduced buff from 0.4
-        main_flow.next_to(title, DOWN, buff=0.2) # Reduced buff from 0.3
+        final_tip_group = VGroup(tip_rect, tip_text)
 
-        # --- Arrows ---
-        arrow_config = {"buff": 0.1, "color": arrow_color, "stroke_width": 3, "tip_length": 0.2}
-        arrow1 = Arrow(start_text.get_bottom(), foundations.get_top(), **arrow_config)
-        arrow2 = Arrow(foundations.get_bottom(), core_concepts.get_top(), **arrow_config)
-        arrow3 = Arrow(core_concepts.get_bottom(), applied_dev.get_top(), **arrow_config)
-        arrow4 = Arrow(applied_dev.get_bottom(), advanced_topics.get_top(), **arrow_config)
-        arrow5 = Arrow(advanced_topics.get_bottom(), goal_text.get_top(), **arrow_config)
+        # 5. Assemble the entire infographic structure for final positioning
+        steps_and_arrows = VGroup(steps_vgroup, arrows)
 
-        # --- Side Tips ---
-        tip_style = {"font_size": tip_text_font_size, "color": text_color, "line_spacing": 0.8}
-        tip_rect_properties = {"corner_radius": 0.2, "color": COLOR_PALETTE["tip_bg"], "fill_opacity": 0.7}
-        tip_text_padding_width = 0.15 # Reduced from 0.3
-        tip_text_padding_height = 0.1 # Reduced from 0.2
-        tip_horizontal_buff = 0.4 # Reduced from 0.5
-
-        # Tip 1: General learning advice
-        tip1_heading = Text("PRO TIPS:", font_size=tip_text_font_size + 2, color=COLOR_PALETTE["tip_heading"], weight=BOLD)
-        tip1_content = Text("• Practice Daily, Build Projects\n• Debug & Read Docs\n• Join Dev Communities", **tip_style)
+        all_content = VGroup(title, steps_and_arrows, final_tip_group)
         
-        # Create a VGroup for the text content, arranged with left alignment
-        tip1_text_elements = VGroup(tip1_heading, tip1_content).arrange(DOWN, buff=0.05, aligned_edge=LEFT)
-        
-        # Create the rectangle sized for the text, initially at ORIGIN
-        tip1_rect = RoundedRectangle(
-            width=tip1_text_elements.width + tip_text_padding_width * 2,
-            height=tip1_text_elements.height + tip_text_padding_height * 2,
-            **tip_rect_properties
-        )
-        
-        # Position the text elements relative to the rectangle to ensure visual left alignment with padding
-        tip1_text_elements.align_to(tip1_rect, LEFT)
-        tip1_text_elements.shift(RIGHT * tip_text_padding_width)
-        tip1_text_elements.set_y(tip1_rect.get_y()) # Vertically center the text within the rectangle
-        
-        # Finally, group the rectangle and the now-positioned text elements
-        tip1_group = VGroup(tip1_rect, tip1_text_elements)
-        
-        # Tip 2: Advanced/Growth advice
-        tip2_heading = Text("CAREER & GROWTH:", font_size=tip_text_font_size + 2, color=COLOR_PALETTE["tip_heading"], weight=BOLD)
-        tip2_content = Text("• Contribute to Open Source\n• Network & Specialize\n• Continuous Learning", **tip_style)
-        
-        tip2_text_elements = VGroup(tip2_heading, tip2_content).arrange(DOWN, buff=0.05, aligned_edge=LEFT)
-        tip2_rect = RoundedRectangle(
-            width=tip2_text_elements.width + tip_text_padding_width * 2,
-            height=tip2_text_elements.height + tip_text_padding_height * 2,
-            **tip_rect_properties
-        )
-        tip2_text_elements.align_to(tip2_rect, LEFT)
-        tip2_text_elements.shift(RIGHT * tip_text_padding_width)
-        tip2_text_elements.set_y(tip2_rect.get_y())
-        tip2_group = VGroup(tip2_rect, tip2_text_elements)
-        
-        # Position tips to the right of the main stage flow, aligning with relevant stages
-        tip1_group.set_x(main_flow.get_right()[0] + tip_horizontal_buff + tip1_group.width/2)
-        tip1_group.set_y(foundations.get_center()[1])
-        
-        tip2_group.set_x(main_flow.get_right()[0] + tip_horizontal_buff + tip2_group.width/2)
-        tip2_group.set_y(advanced_topics.get_center()[1])
-
-        # --- Footer ---
-        footer_text = Text("Knowledge is Power. Code Wisely!", font_size=18, color=LIGHT_GRAY)
-        
-        # --- Assemble main elements and scale to fit ---
-        main_elements = VGroup(
-            title,
-            main_flow,
-            arrow1, arrow2, arrow3, arrow4, arrow5,
-            tip1_group, tip2_group,
-        )
-
-        # Scale the collection to fit within the scene frame (approx 14.22x8 units)
-        # Target height reduced to leave enough space for footer and prevent cutoff
-        target_height = config.frame_height * 0.9 # Reduced from 0.95
-        target_width = config.frame_width * 0.95
-
-        if main_elements.height > target_height or main_elements.width > target_width:
-            main_elements.scale_to_fit_height(target_height)
-            if main_elements.width > target_width:
-                main_elements.scale_to_fit_width(target_width)
-        
-        main_elements.move_to(ORIGIN) # Center the main diagram on the screen
-
-        # Position footer relative to the scaled main diagram
-        footer_text.next_to(main_elements, DOWN, buff=0.2)
+        # Arrange and scale to fit the frame
+        all_content.arrange(DOWN, buff=vertical_group_buff, center=True)
+        all_content.scale_to_fit_height(config.frame_height * 0.9).center()
 
         # Add all elements to the scene
-        self.add(main_elements, footer_text)
+        self.add(all_content)
