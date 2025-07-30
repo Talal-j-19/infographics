@@ -44,3 +44,6 @@ Thumbs.db
 
 # Environment variables
 .env
+
+#rag data
+manim_rag_db/
