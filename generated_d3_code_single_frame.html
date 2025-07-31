@@ -1,0 +1,106 @@
+<div id="d3-container"></div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    const width = 1000;
+    const height = 600;
+
+    const svg = d3.select("#d3-container")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .style("background-color", "#f9f9f9");
+
+    // Define arrowhead marker
+    svg.append("defs").append("marker")
+        .attr("id", "arrowhead")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 5)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#333");
+
+    const elements = [
+        { "type": "text", "content": "LoRA: Low-Rank Adaptation", "x": 500, "y": 50, "fontSize": "36px", "fontWeight": "bold", "textAnchor": "middle", "fill": "#2c3e50" },
+        { "type": "text", "content": "Efficient Fine-tuning for Large Models", "x": 500, "y": 95, "fontSize": "20px", "textAnchor": "middle", "fill": "#555" },
+        {
+            "type": "group", "id": "lora-concept-diagram", "elements": [
+                { "type": "rect", "x": 100, "y": 180, "width": 300, "height": 100, "fill": "#e0e0e0", "stroke": "#333", "strokeWidth": 2, "rx": 8, "ry": 8 },
+                { "type": "text", "content": "Pre-trained Large Model", "x": 250, "y": 230, "fontSize": "18px", "fontWeight": "bold", "textAnchor": "middle", "fill": "#333" },
+                { "type": "text", "content": "(Frozen Weights)", "x": 250, "y": 255, "fontSize": "14px", "textAnchor": "middle", "fill": "#666" },
+                {
+                    "type": "group", "id": "lora-adapters-group", "elements": [
+                        { "type": "rect", "x": 500, "y": 200, "width": 80, "height": 60, "fill": "#a9d0f5", "stroke": "#369", "strokeWidth": 2, "rx": 5, "ry": 5 },
+                        { "type": "text", "content": "Matrix A", "x": 540, "y": 235, "fontSize": "12px", "textAnchor": "middle", "fill": "#369" },
+                        { "type": "rect", "x": 600, "y": 200, "width": 80, "height": 60, "fill": "#a9d0f5", "stroke": "#369", "strokeWidth": 2, "rx": 5, "ry": 5 },
+                        { "type": "text", "content": "Matrix B", "x": 640, "y": 235, "fontSize": "12px", "textAnchor": "middle", "fill": "#369" },
+                        { "type": "text", "content": "Trainable", "x": 590, "y": 175, "fontSize": "12px", "textAnchor": "middle", "fill": "#666" },
+                        { "type": "text", "content": "Low-Rank Update (ΔW = A x B)", "x": 590, "y": 295, "fontSize": "14px", "textAnchor": "middle", "fill": "#369", "fontWeight": "bold" }
+                    ]
+                },
+                { "type": "line", "x1": 400, "y1": 230, "x2": 500, "y2": 230, "stroke": "#333", "strokeWidth": 2, "markerEnd": "url(#arrowhead)" },
+                { "type": "line", "x1": 680, "y1": 230, "x2": 780, "y2": 230, "stroke": "#333", "strokeWidth": 2, "markerEnd": "url(#arrowhead)" },
+                { "type": "text", "content": "+", "x": 780, "y": 235, "fontSize": "30px", "textAnchor": "middle", "fontWeight": "bold", "fill": "#333" },
+                { "type": "rect", "x": 800, "y": 180, "width": 180, "height": 100, "fill": "#e0e0e0", "stroke": "#333", "strokeWidth": 2, "rx": 8, "ry": 8 },
+                { "type": "text", "content": "Fine-tuned Model", "x": 890, "y": 230, "fontSize": "18px", "fontWeight": "bold", "textAnchor": "middle", "fill": "#333" },
+                { "type": "line", "x1": 790, "y1": 230, "x2": 800, "y2": 230, "stroke": "#333", "strokeWidth": 2, "markerEnd": "url(#arrowhead)" }
+            ]
+        },
+        { "type": "text", "content": "Key Advantages", "x": 250, "y": 400, "fontSize": "24px", "fontWeight": "bold", "textAnchor": "middle", "fill": "#2c3e50" },
+        { "type": "text", "content": "• Smaller Storage (MBs vs. GBs)", "x": 100, "y": 450, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        { "type": "text", "content": "• Faster Training (fraction of params)", "x": 100, "y": 480, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        { "type": "text", "content": "• Lower Memory Footprint", "x": 100, "y": 510, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        { "type": "text", "content": "• Modularity (swap adapters)", "x": 100, "y": 540, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        
+        { "type": "text", "content": "Common Use Cases", "x": 718, "y": 400, "fontSize": "24px", "fontWeight": "bold", "textAnchor": "middle", "fill": "#2c3e50" },
+        { "type": "text", "content": "• LLM Fine-tuning (domain adaptation)", "x": 550, "y": 450, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        { "type": "text", "content": "• Image Generation (custom styles)", "x": 550, "y": 480, "fontSize": "16px", "textAnchor": "start", "fill": "#333" },
+        { "type": "text", "content": "• Transfer Learning (new tasks)", "x": 550, "y": 510, "fontSize": "16px", "textAnchor": "start", "fill": "#333" }
+    ];
+
+    function renderElements(selection, elementsData) {
+        elementsData.forEach(element => {
+            if (element.type === "text") {
+                selection.append("text")
+                    .attr("x", element.x)
+                    .attr("y", element.y)
+                    .attr("font-size", element.fontSize)
+                    .attr("font-weight", element.fontWeight || "normal")
+                    .attr("text-anchor", element.textAnchor || "start")
+                    .attr("fill", element.fill || "#000")
+                    .text(element.content);
+            } else if (element.type === "rect") {
+                selection.append("rect")
+                    .attr("x", element.x)
+                    .attr("y", element.y)
+                    .attr("width", element.width)
+                    .attr("height", element.height)
+                    .attr("fill", element.fill || "none")
+                    .attr("stroke", element.stroke || "none")
+                    .attr("stroke-width", element.strokeWidth || 0)
+                    .attr("rx", element.rx || 0)
+                    .attr("ry", element.ry || 0);
+            } else if (element.type === "line") {
+                selection.append("line")
+                    .attr("x1", element.x1)
+                    .attr("y1", element.y1)
+                    .attr("x2", element.x2)
+                    .attr("y2", element.y2)
+                    .attr("stroke", element.stroke || "#000")
+                    .attr("stroke-width", element.strokeWidth || 1)
+                    .attr("marker-end", element.markerEnd || "");
+            } else if (element.type === "group") {
+                const group = selection.append("g")
+                    .attr("id", element.id);
+                renderElements(group, element.elements); // Recursively render elements within the group
+            }
+        });
+    }
+
+    renderElements(svg, elements);
+
+</script>
