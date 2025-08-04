@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Good Coding Practices Infographic</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        body { margin: 0; overflow: hidden; }
+    </style>
+</head>
+<body>
+    <div id="infographic-container"></div>
+    <script>
+        const svgWidth = 900;
+        const svgHeight = 700;
+        const topMargin = 40;
+        const sideMargin = 40;
+        const bottomMargin = 40;
+        const rowGap = 30; // Gap between top and bottom row of panels
+        const colGap = 30; // Gap between left and right column of panels
+        const panelInnerPadding = 25; // Internal padding for text within panels
+
+        // Define font sizes for layout calculations
+        const mainTitleFontSize = 36;
+        const subTitleFontSize = 20;
+        const footerFontSize = 16;
+        const panelTitleFontSize = 22;
+        const panelDescFontSize = 14;
+
+        // Define vertical spacing between elements
+        const spaceAfterMainTitle = 15; // Space between main title and subtitle
+        const spaceAfterSubTitle = 30;  // Space between subtitle and first row of panels
+        const panelTitleToDescGap = 10; // Space between panel title and description
+        const spaceBeforeFooter = 30;   // Space between last row of panels and footer
+
+        // Calculate panel dimensions
+        const panelWidth = (svgWidth - 2 * sideMargin - colGap) / 2;
+
+        // Calculate Y position for the first row of panels
+        const panelRow1Y = topMargin + mainTitleFontSize + spaceAfterMainTitle + subTitleFontSize + spaceAfterSubTitle;
+
+        // Calculate the height for each panel
+        const totalVerticalSpaceForPanels = svgHeight - panelRow1Y - bottomMargin - footerFontSize - spaceBeforeFooter;
+        const panelHeight = (totalVerticalSpaceForPanels - rowGap) / 2;
+
+        const svg = d3.select("#infographic-container")
+            .append("svg")
+            .attr("width", svgWidth)
+            .attr("height", svgHeight)
+            .style("background-color", "#ffffff");
+
+        // Main Title
+        svg.append("text")
+            .attr("x", svgWidth / 2)
+            .attr("y", topMargin)
+            .attr("font-size", mainTitleFontSize + "px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#2c3e50")
+            .text("Good Coding Practices");
+
+        // Subtitle/Slogan
+        svg.append("text")
+            .attr("x", svgWidth / 2)
+            .attr("y", topMargin + mainTitleFontSize + spaceAfterMainTitle)
+            .attr("font-size", subTitleFontSize + "px")
+            .attr("fill", "#7f8c8d")
+            .attr("text-anchor", "middle")
+            .text("Crafting Clean, Efficient, and Maintainable Code");
+
+        // --- Panel 1: Readability & Clarity ---
+        const panel1X = sideMargin;
+        const panel1Y = panelRow1Y;
+        const panel1Color = "#3498db";
+
+        svg.append("rect")
+            .attr("x", panel1X)
+            .attr("y", panel1Y)
+            .attr("width", panelWidth)
+            .attr("height", panelHeight)
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("fill", "#ecf0f1")
+            .attr("stroke", panel1Color)
+            .attr("stroke-width", 2);
+
+        svg.append("text")
+            .attr("x", panel1X + panelWidth / 2)
+            .attr("y", panel1Y + panelInnerPadding)
+            .attr("font-size", panelTitleFontSize + "px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("fill", panel1Color)
+            .text("Readability & Clarity");
+
+        const readabilityDescTextY = panel1Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
+        const readabilityDesc = svg.append("text")
+            .attr("x", panel1X + panelWidth / 2)
+            .attr("y", readabilityDescTextY)
+            .attr("font-size", panelDescFontSize + "px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#34495e");
+        readabilityDesc.append("tspan")
+            .attr("x", panel1X + panelWidth / 2)
+            .attr("dy", "0em")
+            .text("Write clear, concise, self-documenting code.");
+        readabilityDesc.append("tspan")
+            .attr("x", panel1X + panelWidth / 2)
+            .attr("dy", "1.4em")
+            .text("Use meaningful names & consistent formatting.");
+
+        // --- Panel 2: Modularity & Reusability ---
+        const panel2X = sideMargin + panelWidth + colGap;
+        const panel2Y = panelRow1Y;
+        const panel2Color = "#27ae60";
+
+        svg.append("rect")
+            .attr("x", panel2X)
+            .attr("y", panel2Y)
+            .attr("width", panelWidth)
+            .attr("height", panelHeight)
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("fill", "#ecf0f1")
+            .attr("stroke", panel2Color)
+            .attr("stroke-width", 2);
+
+        svg.append("text")
+            .attr("x", panel2X + panelWidth / 2)
+            .attr("y", panel2Y + panelInnerPadding)
+            .attr("font-size", panelTitleFontSize + "px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("fill", panel2Color)
+            .text("Modularity & Reusability");
+
+        const modularityDescTextY = panel2Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
+        const modularityDesc = svg.append("text")
+            .attr("x", panel2X + panelWidth / 2)
+            .attr("y", modularityDescTextY)
+            .attr("font-size", panelDescFontSize + "px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#34495e");
+        modularityDesc.append("tspan")
+            .attr("x", panel2X + panelWidth / 2)
+            .attr("dy", "0em")
+            .text("Break code into small, independent components.");
+        modularityDesc.append("tspan")
+            .attr("x", panel2X + panelWidth / 2)
+            .attr("dy", "1.4em")
+            .text("Promote code reuse across projects.");
+
+        // --- Panel 3: Testing & Debugging ---
+        const panel3X = sideMargin;
+        const panel3Y = panelRow1Y + panelHeight + rowGap;
+        const panel3Color = "#f39c12";
+
+        svg.append("rect")
+            .attr("x", panel3X)
+            .attr("y", panel3Y)
+            .attr("width", panelWidth)
+            .attr("height", panelHeight)
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("fill", "#ecf0f1")
+            .attr("stroke", panel3Color)
+            .attr("stroke-width", 2);
+
+        svg.append("text")
+            .attr("x", panel3X + panelWidth / 2)
+            .attr("y", panel3Y + panelInnerPadding)
+            .attr("font-size", panelTitleFontSize + "px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("fill", panel3Color)
+            .text("Testing & Debugging");
+
+        const testingDescTextY = panel3Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
+        const testingDesc = svg.append("text")
+            .attr("x", panel3X + panelWidth / 2)
+            .attr("y", testingDescTextY)
+            .attr("font-size", panelDescFontSize + "px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#34495e");
+        testingDesc.append("tspan")
+            .attr("x", panel3X + panelWidth / 2)
+            .attr("dy", "0em")
+            .text("Implement unit and integration tests.");
+        testingDesc.append("tspan")
+            .attr("x", panel3X + panelWidth / 2)
+            .attr("dy", "1.4em")
+            .text("Debug systematically to find and fix issues.");
+
+        // --- Panel 4: Documentation & Comments ---
+        const panel4X = sideMargin + panelWidth + colGap;
+        const panel4Y = panelRow1Y + panelHeight + rowGap;
+        const panel4Color = "#9b59b6";
+
+        svg.append("rect")
+            .attr("x", panel4X)
+            .attr("y", panel4Y)
+            .attr("width", panelWidth)
+            .attr("height", panelHeight)
+            .attr("rx", 10)
+            .attr("ry", 10)
+            .attr("fill", "#ecf0f1")
+            .attr("stroke", panel4Color)
+            .attr("stroke-width", 2);
+
+        svg.append("text")
+            .attr("x", panel4X + panelWidth / 2)
+            .attr("y", panel4Y + panelInnerPadding)
+            .attr("font-size", panelTitleFontSize + "px")
+            .attr("font-weight", "bold")
+            .attr("text-anchor", "middle")
+            .attr("fill", panel4Color)
+            .text("Documentation & Comments");
+
+        const docDescTextY = panel4Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
+        const docDesc = svg.append("text")
+            .attr("x", panel4X + panelWidth / 2)
+            .attr("y", docDescTextY)
+            .attr("font-size", panelDescFontSize + "px")
+            .attr("text-anchor", "middle")
+            .attr("fill", "#34495e");
+        // Adjusted text for Panel 4 to ensure it fits horizontally without overflow
+        docDesc.append("tspan")
+            .attr("x", panel4X + panelWidth / 2)
+            .attr("dy", "0em")
+            .text("Document code with clear comments");
+        docDesc.append("tspan")
+            .attr("x", panel4X + panelWidth / 2)
+            .attr("dy", "1.4em")
+            .text("and external documentation where needed.");
+
+        // Footer
+        svg.append("text")
+            .attr("x", svgWidth / 2)
+            .attr("y", svgHeight - bottomMargin)
+            .attr("font-size", footerFontSize + "px")
+            .attr("fill", "#7f8c8d")
+            .attr("text-anchor", "middle")
+            .text("Elevate Your Codebase!");
+
+    </script>
+</body>
+</html>

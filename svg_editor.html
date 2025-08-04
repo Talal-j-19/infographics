@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Simple SVG Editor</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      display: flex;
+      gap: 20px;
+    }
+    #canvas-wrapper {
+      border: 1px solid #ccc;
+      flex: 1;
+      position: relative;
+    }
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+    .selected {
+      stroke: red;
+      stroke-width: 2;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <h3>Paste SVG Code</h3>
+    <textarea id="svgInput" rows="10" cols="40">
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300">
+  <rect x="50" y="50" width="100" height="80" fill="skyblue" />
+  <circle cx="250" cy="100" r="40" fill="tomato" />
+  <text x="100" y="200" font-size="20">Edit Me</text>
+</svg>
+    </textarea>
+    <br>
+    <button onclick="loadSVG()">Load SVG</button>
+  </div>
+
+  <div id="canvas-wrapper">
+    <div id="canvas"></div>
+  </div>
+
+  <script>
+    let selected = null;
+    let offsetX = 0;
+    let offsetY = 0;
+
+    function loadSVG() {
+      const svgCode = document.getElementById("svgInput").value;
+      const canvas = document.getElementById("canvas");
+      canvas.innerHTML = svgCode;
+
+      const svg = canvas.querySelector("svg");
+
+      svg.querySelectorAll("rect, circle, text").forEach(el => {
+        el.style.cursor = "move";
+        el.addEventListener("mousedown", startDrag);
+        el.addEventListener("click", (e) => {
+          svg.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
+          el.classList.add("selected");
+          e.stopPropagation();
+        });
+      });
+
+      svg.addEventListener("mousedown", () => {
+        svg.querySelectorAll(".selected").forEach(el => el.classList.remove("selected"));
+      });
+
+      document.addEventListener("mouseup", () => selected = null);
+      document.addEventListener("mousemove", drag);
+    }
+
+    function startDrag(e) {
+      selected = e.target;
+      if (selected.tagName === "rect") {
+        offsetX = e.clientX - parseFloat(selected.getAttribute("x"));
+        offsetY = e.clientY - parseFloat(selected.getAttribute("y"));
+      } else if (selected.tagName === "circle") {
+        offsetX = e.clientX - parseFloat(selected.getAttribute("cx"));
+        offsetY = e.clientY - parseFloat(selected.getAttribute("cy"));
+      } else if (selected.tagName === "text") {
+        offsetX = e.clientX - parseFloat(selected.getAttribute("x"));
+        offsetY = e.clientY - parseFloat(selected.getAttribute("y"));
+      }
+    }
+
+    function drag(e) {
+      if (!selected) return;
+
+      if (selected.tagName === "rect") {
+        selected.setAttribute("x", e.clientX - offsetX);
+        selected.setAttribute("y", e.clientY - offsetY);
+      } else if (selected.tagName === "circle") {
+        selected.setAttribute("cx", e.clientX - offsetX);
+        selected.setAttribute("cy", e.clientY - offsetY);
+      } else if (selected.tagName === "text") {
+        selected.setAttribute("x", e.clientX - offsetX);
+        selected.setAttribute("y", e.clientY - offsetY);
+      }
+    }
+  </script>
+</body>
+</html>

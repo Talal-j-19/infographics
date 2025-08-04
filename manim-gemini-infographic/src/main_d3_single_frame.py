@@ -71,6 +71,15 @@ def main():
                 print(f"PNG saved to: {png_path}")
             except Exception as e:
                 print(f"[WARN] Could not export PNG automatically: {e}")
+
+            # Export SVG automatically using the helper
+            try:
+                from save_infographic_as_svg import save_infographic_as_svg
+                print("Exporting infographic as SVG...")
+                svg_path = save_infographic_as_svg(code_file)
+                print(f"SVG saved to: {svg_path}")
+            except Exception as e:
+                print(f"[WARN] Could not export SVG automatically: {e}")
             break
         else:
             print("Attempting to fix code using Gemini API...")
