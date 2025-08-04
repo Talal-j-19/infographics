@@ -1,245 +1,319 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Good Coding Practices Infographic</title>
+    <title>Working of Large Language Models (LLMs)</title>
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-        body { margin: 0; overflow: hidden; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            overflow: hidden; /* Prevent scrollbars */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #f8f9fa; /* Lighter background */
+        }
+        .infographic-container {
+            border: 1px solid #dee2e6;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* Softer shadow */
+            background-color: white;
+            border-radius: 12px; /* Slightly more rounded container */
+        }
+        text {
+            fill: #343a40; /* Darker text */
+            font-size: 14px;
+        }
+        .title {
+            font-size: 28px; /* Larger title */
+            font-weight: bold;
+            text-anchor: middle;
+            fill: #212529; /* Even darker title */
+        }
+        .box-label {
+            font-size: 17px; /* Slightly larger label */
+            font-weight: bold;
+            text-anchor: middle;
+            fill: #495057; /* Darker label */
+        }
+        .box-content {
+            font-size: 13px; /* Keep content concise */
+            text-anchor: middle;
+            fill: #6c757d; /* Softer content text */
+        }
+        .transformer-detail-label {
+            font-size: 14px; /* Slightly larger for emphasis */
+            font-weight: bold;
+            text-anchor: middle;
+            fill: #28a745; /* Green for key components */
+        }
+        .transformer-detail-desc {
+            font-size: 11.5px; /* Smaller for detail text */
+            text-anchor: middle;
+            fill: #6c757d; /* Softer content text */
+        }
+        .note-caption {
+            font-size: 13.5px;
+            text-anchor: middle;
+            fill: #495057;
+        }
+        rect {
+            fill: #e9ecef; /* Very light grey */
+            stroke: #ced4da; /* Light grey border */
+            stroke-width: 1.5;
+            rx: 10; /* More rounded corners */
+            ry: 10;
+        }
+        .transformer-rect {
+            fill: #e6ffe6; /* Very light green for transformer */
+            stroke: #81c784; /* Green border */
+            stroke-width: 2; /* Thicker border for transformer */
+        }
+        path.arrow {
+            stroke: #007bff; /* Primary blue */
+            stroke-width: 2.5;
+            fill: none;
+        }
+        marker#arrowhead {
+            fill: #007bff; /* Primary blue */
+        }
+        .token-circle {
+            fill: #ffc107; /* Amber for tokens */
+            stroke: #e0a800;
+            stroke-width: 1;
+        }
+        .token-text {
+            font-size: 11px;
+            fill: #343a40;
+            text-anchor: middle;
+            dominant-baseline: central;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
-    <div id="infographic-container"></div>
+    <div class="infographic-container">
+        <svg id="llm-infographic" width="1200" height="600"></svg>
+    </div>
+
     <script>
-        const svgWidth = 900;
-        const svgHeight = 700;
-        const topMargin = 40;
-        const sideMargin = 40;
-        const bottomMargin = 40;
-        const rowGap = 30; // Gap between top and bottom row of panels
-        const colGap = 30; // Gap between left and right column of panels
-        const panelInnerPadding = 25; // Internal padding for text within panels
+        const SVG_WIDTH = 1200;
+        const SVG_HEIGHT = 600;
+        const BOX_W = 160; 
+        const BOX_H = 90; 
+        const LARGE_BOX_W = 280; 
+        const LARGE_BOX_H = 200; 
+        const PADDING_X = 50; 
+        const PADDING_Y_TOP = 80;
+        const PADDING_Y_BOTTOM = 60;
 
-        // Define font sizes for layout calculations
-        const mainTitleFontSize = 36;
-        const subTitleFontSize = 20;
-        const footerFontSize = 16;
-        const panelTitleFontSize = 22;
-        const panelDescFontSize = 14;
+        const svg = d3.select("#llm-infographic");
 
-        // Define vertical spacing between elements
-        const spaceAfterMainTitle = 15; // Space between main title and subtitle
-        const spaceAfterSubTitle = 30;  // Space between subtitle and first row of panels
-        const panelTitleToDescGap = 10; // Space between panel title and description
-        const spaceBeforeFooter = 30;   // Space between last row of panels and footer
+        // Define arrowhead marker
+        svg.append("defs").append("marker")
+            .attr("id", "arrowhead")
+            .attr("viewBox", "0 0 10 10")
+            .attr("refX", 9)
+            .attr("refY", 5)
+            .attr("markerUnits", "strokeWidth")
+            .attr("markerWidth", 8)
+            .attr("markerHeight", 8)
+            .attr("orient", "auto")
+            .append("path")
+            .attr("d", "M 0 0 L 10 5 L 0 10 z");
 
-        // Calculate panel dimensions
-        const panelWidth = (svgWidth - 2 * sideMargin - colGap) / 2;
-
-        // Calculate Y position for the first row of panels
-        const panelRow1Y = topMargin + mainTitleFontSize + spaceAfterMainTitle + subTitleFontSize + spaceAfterSubTitle;
-
-        // Calculate the height for each panel
-        const totalVerticalSpaceForPanels = svgHeight - panelRow1Y - bottomMargin - footerFontSize - spaceBeforeFooter;
-        const panelHeight = (totalVerticalSpaceForPanels - rowGap) / 2;
-
-        const svg = d3.select("#infographic-container")
-            .append("svg")
-            .attr("width", svgWidth)
-            .attr("height", svgHeight)
-            .style("background-color", "#ffffff");
-
-        // Main Title
+        // --- Main Title ---
         svg.append("text")
-            .attr("x", svgWidth / 2)
-            .attr("y", topMargin)
-            .attr("font-size", mainTitleFontSize + "px")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr("fill", "#2c3e50")
-            .text("Good Coding Practices");
+            .attr("class", "title")
+            .attr("x", SVG_WIDTH / 2)
+            .attr("y", PADDING_Y_TOP / 2 + 10)
+            .text("How Large Language Models (LLMs) Work");
 
-        // Subtitle/Slogan
+        // --- Box Definitions ---
+        const boxes = [
+            { id: "input", label: "User Input", content: "Text query (e.g., 'What is AI?')", width: BOX_W, height: BOX_H },
+            { id: "embedding", label: "Embedding Layer", content: "Tokenization → Vector Embeddings", width: BOX_W, height: BOX_H },
+            { id: "transformer", label: "Transformer Stack", content: "", width: LARGE_BOX_W, height: LARGE_BOX_H }, 
+            { id: "output", label: "Output Layer", content: "Logits & Softmax", content2: "(Next Token Prediction)", width: BOX_W, height: BOX_H },
+            { id: "generated", label: "Generated Output", content: "Iterative token generation", width: BOX_W, height: BOX_H }
+        ];
+
+        // Calculate starting X to center the entire flow
+        let totalFlowWidth = boxes.reduce((sum, d) => sum + d.width, 0) + PADDING_X * (boxes.length - 1);
+        let currentX = (SVG_WIDTH - totalFlowWidth) / 2; 
+
+        // Calculate common vertical center for smaller boxes
+        const smallBoxYCenter = (SVG_HEIGHT - PADDING_Y_TOP - PADDING_Y_BOTTOM) / 2 + PADDING_Y_TOP;
+
+        boxes.forEach((d, i) => {
+            let boxY;
+            // Vertically center all boxes by their midpoint
+            boxY = smallBoxYCenter - d.height / 2;
+            
+            d.x = currentX;
+            d.y = boxY;
+            currentX += d.width + PADDING_X;
+
+            svg.append("rect")
+                .attr("x", d.x)
+                .attr("y", d.y)
+                .attr("width", d.width)
+                .attr("height", d.height)
+                .attr("class", d.id === "transformer" ? "transformer-rect" : "");
+
+            // Box Label (above box)
+            svg.append("text")
+                .attr("class", "box-label")
+                .attr("x", d.x + d.width / 2)
+                .attr("y", d.y - 15)
+                .text(d.label);
+
+            // Box Content (inside box)
+            if (d.content) {
+                const textElement = svg.append("text")
+                    .attr("class", "box-content")
+                    .attr("x", d.x + d.width / 2);
+                
+                if (d.id === "output") {
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 - 8) 
+                        .text(d.content);
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 + 8) 
+                        .text(d.content2);
+                } else if (d.id === "embedding") { 
+                    const lines = d.content.split('→'); 
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 - 8)
+                        .text(lines[0].trim());
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 + 8)
+                        .text("→ " + lines[1].trim());
+                } else if (d.id === "input") { 
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 - 8)
+                        .text("Text query");
+                    textElement.append("tspan")
+                        .attr("x", d.x + d.width / 2)
+                        .attr("y", d.y + d.height / 2 + 8)
+                        .text("(e.g., 'What is AI?')");
+                } else {
+                    textElement.attr("y", d.y + d.height / 2).text(d.content);
+                }
+            }
+        });
+
+        // --- Transformer Stack Details ---
+        const transformerBox = boxes.find(b => b.id === "transformer");
+        const labelLineHeight = 18; // For transformer-detail-label (font-size 14px)
+        const descLineHeight = 15;  // For transformer-detail-desc (font-size 11.5px)
+        const interDetailPadding = 15; // Space between different detail blocks
+
+        const details = [
+            { label: "Self-Attention", desc: ["Models relationships between tokens"] },
+            { label: "Feed-Forward Networks", desc: ["Processes each token independently"] },
+            { label: "Residual Connections & Layer Norm", desc: ["Stabilizes training,", "prevents vanishing gradient"] } // This desc is now split
+        ];
+
+        // Calculate total required height for details to center them
+        let totalDetailsContentHeight = 0;
+        details.forEach(d => {
+            totalDetailsContentHeight += labelLineHeight; // For the label
+            totalDetailsContentHeight += d.desc.length * descLineHeight; // For the description lines
+            totalDetailsContentHeight += interDetailPadding; // Space after each block
+        });
+        totalDetailsContentHeight -= interDetailPadding; // Remove the last padding
+
+        // Center vertically within the transformer box
+        const transformerContentYStart = transformerBox.y + (transformerBox.height / 2) - (totalDetailsContentHeight / 2);
+
+        let currentY = transformerContentYStart;
+
+        details.forEach((d, i) => {
+            // Label
+            svg.append("text")
+                .attr("class", "transformer-detail-label")
+                .attr("x", transformerBox.x + transformerBox.width / 2)
+                .attr("y", currentY)
+                .text(d.label);
+            
+            currentY += labelLineHeight; // Move Y for description
+
+            // Description
+            const descTextElement = svg.append("text")
+                .attr("class", "transformer-detail-desc")
+                .attr("x", transformerBox.x + transformerBox.width / 2);
+
+            d.desc.forEach((line, lineIdx) => {
+                descTextElement.append("tspan")
+                    .attr("x", transformerBox.x + transformerBox.width / 2)
+                    .attr("y", currentY + (lineIdx * descLineHeight)) // Position subsequent lines below
+                    .text(line);
+            });
+            
+            currentY += d.desc.length * descLineHeight; // Move Y past all description lines
+            currentY += interDetailPadding; // Add padding before next detail block
+        });
+
+
+        // --- Arrows ---
+        const arrowData = [
+            { source: boxes[0], target: boxes[1] }, // Input -> Embedding
+            { source: boxes[1], target: boxes[2] }, // Embedding -> Transformer
+            { source: boxes[2], target: boxes[3] }, // Transformer -> Output
+            { source: boxes[3], target: boxes[4] }  // Output -> Generated
+        ];
+
+        arrowData.forEach(link => {
+            const sourceX = link.source.x + link.source.width;
+            const sourceY = link.source.y + link.source.height / 2;
+            const targetX = link.target.x;
+            const targetY = link.target.y + link.target.height / 2;
+
+            svg.append("path")
+                .attr("class", "arrow")
+                .attr("d", `M ${sourceX} ${sourceY} L ${targetX} ${targetY}`)
+                .attr("marker-end", "url(#arrowhead)");
+        });
+
+        // --- Informative Caption (Note) ---
         svg.append("text")
-            .attr("x", svgWidth / 2)
-            .attr("y", topMargin + mainTitleFontSize + spaceAfterMainTitle)
-            .attr("font-size", subTitleFontSize + "px")
-            .attr("fill", "#7f8c8d")
-            .attr("text-anchor", "middle")
-            .text("Crafting Clean, Efficient, and Maintainable Code");
+            .attr("class", "note-caption")
+            .attr("x", SVG_WIDTH / 2)
+            .attr("y", SVG_HEIGHT - PADDING_Y_BOTTOM / 2 + 10) 
+            .text("Note: LLMs generate text token by token in an autoregressive (iterative) process.");
+            
+        // --- Token Visual Elements ---
+        const tokenRadius = 8;
 
-        // --- Panel 1: Readability & Clarity ---
-        const panel1X = sideMargin;
-        const panel1Y = panelRow1Y;
-        const panel1Color = "#3498db";
+        // Token from Input to Embedding arrow center
+        const inputToEmbedX = boxes[0].x + boxes[0].width + (PADDING_X / 2);
+        const inputToEmbedY = boxes[0].y + boxes[0].height / 2;
+        svg.append("circle").attr("class", "token-circle").attr("cx", inputToEmbedX).attr("cy", inputToEmbedY).attr("r", tokenRadius);
+        svg.append("text").attr("class", "token-text").attr("x", inputToEmbedX).attr("y", inputToEmbedY).text("T1");
 
-        svg.append("rect")
-            .attr("x", panel1X)
-            .attr("y", panel1Y)
-            .attr("width", panelWidth)
-            .attr("height", panelHeight)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("fill", "#ecf0f1")
-            .attr("stroke", panel1Color)
-            .attr("stroke-width", 2);
+        // Token from Embedding to Transformer arrow center
+        const embedToTransX = boxes[1].x + boxes[1].width + (PADDING_X / 2);
+        const embedToTransY = boxes[1].y + boxes[1].height / 2;
+        svg.append("circle").attr("class", "token-circle").attr("cx", embedToTransX).attr("cy", embedToTransY).attr("r", tokenRadius);
+        svg.append("text").attr("class", "token-text").attr("x", embedToTransX).attr("y", embedToTransY).text("T1");
 
-        svg.append("text")
-            .attr("x", panel1X + panelWidth / 2)
-            .attr("y", panel1Y + panelInnerPadding)
-            .attr("font-size", panelTitleFontSize + "px")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr("fill", panel1Color)
-            .text("Readability & Clarity");
+        // Token from Transformer to Output arrow center (represents sequence context)
+        const transToOutputX = boxes[2].x + boxes[2].width + (PADDING_X / 2);
+        const transToOutputY = boxes[2].y + boxes[2].height / 2;
+        svg.append("circle").attr("class", "token-circle").attr("cx", transToOutputX).attr("cy", transToOutputY).attr("r", tokenRadius);
+        svg.append("text").attr("class", "token-text").attr("x", transToOutputX).attr("y", transToOutputY).text("TN");
 
-        const readabilityDescTextY = panel1Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
-        const readabilityDesc = svg.append("text")
-            .attr("x", panel1X + panelWidth / 2)
-            .attr("y", readabilityDescTextY)
-            .attr("font-size", panelDescFontSize + "px")
-            .attr("text-anchor", "middle")
-            .attr("fill", "#34495e");
-        readabilityDesc.append("tspan")
-            .attr("x", panel1X + panelWidth / 2)
-            .attr("dy", "0em")
-            .text("Write clear, concise, self-documenting code.");
-        readabilityDesc.append("tspan")
-            .attr("x", panel1X + panelWidth / 2)
-            .attr("dy", "1.4em")
-            .text("Use meaningful names & consistent formatting.");
-
-        // --- Panel 2: Modularity & Reusability ---
-        const panel2X = sideMargin + panelWidth + colGap;
-        const panel2Y = panelRow1Y;
-        const panel2Color = "#27ae60";
-
-        svg.append("rect")
-            .attr("x", panel2X)
-            .attr("y", panel2Y)
-            .attr("width", panelWidth)
-            .attr("height", panelHeight)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("fill", "#ecf0f1")
-            .attr("stroke", panel2Color)
-            .attr("stroke-width", 2);
-
-        svg.append("text")
-            .attr("x", panel2X + panelWidth / 2)
-            .attr("y", panel2Y + panelInnerPadding)
-            .attr("font-size", panelTitleFontSize + "px")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr("fill", panel2Color)
-            .text("Modularity & Reusability");
-
-        const modularityDescTextY = panel2Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
-        const modularityDesc = svg.append("text")
-            .attr("x", panel2X + panelWidth / 2)
-            .attr("y", modularityDescTextY)
-            .attr("font-size", panelDescFontSize + "px")
-            .attr("text-anchor", "middle")
-            .attr("fill", "#34495e");
-        modularityDesc.append("tspan")
-            .attr("x", panel2X + panelWidth / 2)
-            .attr("dy", "0em")
-            .text("Break code into small, independent components.");
-        modularityDesc.append("tspan")
-            .attr("x", panel2X + panelWidth / 2)
-            .attr("dy", "1.4em")
-            .text("Promote code reuse across projects.");
-
-        // --- Panel 3: Testing & Debugging ---
-        const panel3X = sideMargin;
-        const panel3Y = panelRow1Y + panelHeight + rowGap;
-        const panel3Color = "#f39c12";
-
-        svg.append("rect")
-            .attr("x", panel3X)
-            .attr("y", panel3Y)
-            .attr("width", panelWidth)
-            .attr("height", panelHeight)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("fill", "#ecf0f1")
-            .attr("stroke", panel3Color)
-            .attr("stroke-width", 2);
-
-        svg.append("text")
-            .attr("x", panel3X + panelWidth / 2)
-            .attr("y", panel3Y + panelInnerPadding)
-            .attr("font-size", panelTitleFontSize + "px")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr("fill", panel3Color)
-            .text("Testing & Debugging");
-
-        const testingDescTextY = panel3Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
-        const testingDesc = svg.append("text")
-            .attr("x", panel3X + panelWidth / 2)
-            .attr("y", testingDescTextY)
-            .attr("font-size", panelDescFontSize + "px")
-            .attr("text-anchor", "middle")
-            .attr("fill", "#34495e");
-        testingDesc.append("tspan")
-            .attr("x", panel3X + panelWidth / 2)
-            .attr("dy", "0em")
-            .text("Implement unit and integration tests.");
-        testingDesc.append("tspan")
-            .attr("x", panel3X + panelWidth / 2)
-            .attr("dy", "1.4em")
-            .text("Debug systematically to find and fix issues.");
-
-        // --- Panel 4: Documentation & Comments ---
-        const panel4X = sideMargin + panelWidth + colGap;
-        const panel4Y = panelRow1Y + panelHeight + rowGap;
-        const panel4Color = "#9b59b6";
-
-        svg.append("rect")
-            .attr("x", panel4X)
-            .attr("y", panel4Y)
-            .attr("width", panelWidth)
-            .attr("height", panelHeight)
-            .attr("rx", 10)
-            .attr("ry", 10)
-            .attr("fill", "#ecf0f1")
-            .attr("stroke", panel4Color)
-            .attr("stroke-width", 2);
-
-        svg.append("text")
-            .attr("x", panel4X + panelWidth / 2)
-            .attr("y", panel4Y + panelInnerPadding)
-            .attr("font-size", panelTitleFontSize + "px")
-            .attr("font-weight", "bold")
-            .attr("text-anchor", "middle")
-            .attr("fill", panel4Color)
-            .text("Documentation & Comments");
-
-        const docDescTextY = panel4Y + panelInnerPadding + panelTitleFontSize + panelTitleToDescGap;
-        const docDesc = svg.append("text")
-            .attr("x", panel4X + panelWidth / 2)
-            .attr("y", docDescTextY)
-            .attr("font-size", panelDescFontSize + "px")
-            .attr("text-anchor", "middle")
-            .attr("fill", "#34495e");
-        // Adjusted text for Panel 4 to ensure it fits horizontally without overflow
-        docDesc.append("tspan")
-            .attr("x", panel4X + panelWidth / 2)
-            .attr("dy", "0em")
-            .text("Document code with clear comments");
-        docDesc.append("tspan")
-            .attr("x", panel4X + panelWidth / 2)
-            .attr("dy", "1.4em")
-            .text("and external documentation where needed.");
-
-        // Footer
-        svg.append("text")
-            .attr("x", svgWidth / 2)
-            .attr("y", svgHeight - bottomMargin)
-            .attr("font-size", footerFontSize + "px")
-            .attr("fill", "#7f8c8d")
-            .attr("text-anchor", "middle")
-            .text("Elevate Your Codebase!");
+        // Token from Output to Generated arrow center (represents newly predicted token)
+        const outputToGeneratedX = boxes[3].x + boxes[3].width + (PADDING_X / 2);
+        const outputToGeneratedY = boxes[3].y + boxes[3].height / 2;
+        svg.append("circle").attr("class", "token-circle").attr("cx", outputToGeneratedX).attr("cy", outputToGeneratedY).attr("r", tokenRadius);
+        svg.append("text").attr("class", "token-text").attr("x", outputToGeneratedX).attr("y", outputToGeneratedY).text("Tk"); /* Tk for new token */
 
     </script>
 </body>
