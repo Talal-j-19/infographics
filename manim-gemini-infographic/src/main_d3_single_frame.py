@@ -53,6 +53,16 @@ def main():
             f.write(d3_code)
         print(f"Generated D3.js code saved to: {code_file}")
 
+        # Fix infographic structure and make it responsive
+        try:
+            import sys
+            sys.path.append('..')
+            from fix_infographic_issues import fix_infographic_html
+            fix_infographic_html(code_file)
+            print("✅ Fixed infographic structure and made it responsive")
+        except Exception as e:
+            print(f"[WARN] Could not fix infographic structure: {e}")
+
         # Try to open the HTML file in the default browser for preview
         import webbrowser
         import os
