@@ -60,7 +60,13 @@ def main():
             f.write(d3_code)
         print(f"Generated D3.js code saved to: {code_file}")
 
-        # Note: HTML structure fixes are now handled by the reliable SVG export system
+        # Add responsive scaling to ensure infographic fits on screen
+        try:
+            from add_responsive_scaling import add_responsive_scaling
+            add_responsive_scaling(code_file)
+            print("✅ Added responsive scaling for proper display")
+        except Exception as e:
+            print(f"[WARN] Could not add responsive scaling: {e}")
 
         # Try to open the HTML file in the default browser for preview
         import webbrowser
