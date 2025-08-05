@@ -10,7 +10,8 @@ import time
 # Usage: python export_infographic_png.py <html_file> <output_svg> --svg
 
 def export_infographic_to_png(html_file, output_png, wait_time=2):
-    html_path = Path(html_file).absolute().as_uri()
+    import time
+    html_path = Path(html_file).absolute().as_uri() + f"?v={int(time.time())}"
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')
@@ -54,7 +55,7 @@ def export_infographic_to_svg(html_file, output_svg, wait_time=2):
     """
     Export the SVG content from an HTML file to a standalone SVG file.
     """
-    html_path = Path(html_file).absolute().as_uri()
+    html_path = Path(html_file).absolute().as_uri() + f"?v={int(time.time())}"
     options = Options()
     options.add_argument('--headless')
     options.add_argument('--disable-gpu')

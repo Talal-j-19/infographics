@@ -61,10 +61,13 @@ def get_d3_code_single_frame(prompt):
                 "Do NOT use any custom or undefined classes, functions, or imports. "
                 "Do NOT try to explain in so much detail that the frame becomes crowded or unreadable. "
                 "Use ONLY the provided elements. "
+                "IMPORTANT SIZING CONSTRAINTS: Create SVG with dimensions that fit comfortably on standard screens. "
+                "Recommended SVG size: width=800-1000px, height=600-800px maximum. Avoid creating very tall infographics (>900px height) that require excessive scrolling. "
+                "Design for landscape orientation when possible. If content requires more height, use compact layouts, smaller fonts, or multi-column arrangements. "
                 "Pay special attention to layout boundaries: No text or element should go outside the visible SVG area or overlap with other elements. "
                 "All text and diagram elements must be placed so that they fit within the SVG canvas, with appropriate padding from the edges. "
                 "Text labels, section titles, and formulas must not overlap with each other or with diagram elements. Adjust font size, wrapping, or positioning as needed to ensure clarity and no overflow. "
-                "If there is not enough space, reduce the number of elements or use ellipsis, but never let text go outside the canvas or overlap."
+                "If there is not enough space, reduce the number of elements, use smaller fonts, or create a more compact layout, but never let text go outside the canvas or overlap."
             )
             user_prompt = (
                 f"Topic: {prompt.get('topic', '')}\n"

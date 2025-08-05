@@ -35,6 +35,13 @@ def main():
     for i, el in enumerate(elements_list, 1):
         print(f"  {i}. {el}")
 
+    # Initialize job manager for unique generation
+    from job_manager import InfographicJobManager
+
+    job_manager = InfographicJobManager()
+    job_id, job_dir = job_manager.create_new_job(topic)
+    file_paths = job_manager.get_file_paths()
+
     # Step 2: Ask LLM to generate D3.js code for those elements
     print("Fetching D3.js code from Gemini API...")
     code_prompt_obj = {
@@ -45,7 +52,7 @@ def main():
     code_prompt_obj.update(options)
     max_attempts = 10
     attempt = 0
-    code_file = "generated_d3_code_single_frame.html"
+    code_file = str(file_paths['html'])  # Use job-specific path
     d3_code = get_d3_code_single_frame(code_prompt_obj)
 
     while attempt < max_attempts:
@@ -53,15 +60,13 @@ def main():
             f.write(d3_code)
         print(f"Generated D3.js code saved to: {code_file}")
 
-        # Fix infographic structure and make it responsive
+        # Add responsive scaling to ensure infographic fits on screen
         try:
-            import sys
-            sys.path.append('..')
-            from fix_infographic_issues import fix_infographic_html
-            fix_infographic_html(code_file)
-            print("✅ Fixed infographic structure and made it responsive")
+            from add_responsive_scaling import add_responsive_scaling
+            add_responsive_scaling(code_file)
+            print("✅ Added responsive scaling for proper display")
         except Exception as e:
-            print(f"[WARN] Could not fix infographic structure: {e}")
+            print(f"[WARN] Could not add responsive scaling: {e}")
 
         # Try to open the HTML file in the default browser for preview
         import webbrowser
@@ -77,7 +82,7 @@ def main():
             try:
                 from save_infographic_as_png import save_infographic_as_png
                 print("Exporting infographic as PNG...")
-                png_path = save_infographic_as_png(code_file)
+                png_path = save_infographic_as_png(code_file, str(file_paths['png']))
                 print(f"PNG saved to: {png_path}")
             except Exception as e:
                 print(f"[WARN] Could not export PNG automatically: {e}")
@@ -86,10 +91,17 @@ def main():
             try:
                 from save_infographic_as_svg import save_infographic_as_svg
                 print("Exporting infographic as SVG...")
-                svg_path = save_infographic_as_svg(code_file)
+                svg_path = save_infographic_as_svg(code_file, str(file_paths['svg']))
                 print(f"SVG saved to: {svg_path}")
             except Exception as e:
-                print(f"[WARN] Could not export SVG automatically: {e}")
+                print(f"[ERROR] Could not export SVG automatically: {e}")
+                import traceback
+                traceback.print_exc()
+
+            # Save job information
+            job_manager.save_job_info(topic, len(elements_list))
+            print(f"✅ Job completed: {job_id}")
+            print(f"📁 Files saved in: {job_dir}")
             break
         else:
             print("Attempting to fix code using Gemini API...")
