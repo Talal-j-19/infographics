@@ -19,14 +19,26 @@ def save_infographic_as_svg(html_path, output_svg=None):
     print(f"[DEBUG] Starting reliable SVG export: {html_path_abs} -> {output_svg_abs}")
 
     try:
-        # Use the reliable SVG export method
+        # Use the new reliable SVG export V2 method (Puppeteer + Chrome download)
+        from reliable_svg_export_v2 import reliable_svg_export_v2
+        result_path = reliable_svg_export_v2(str(html_path_abs), str(output_svg_abs))
+        if result_path and Path(result_path).exists():
+            print(f"[DEBUG] Reliable SVG export V2 completed: {result_path}")
+            return result_path
+        else:
+            print("[WARNING] Reliable SVG export V2 failed, trying fallback")
+    except Exception as e:
+        print(f"[ERROR] Reliable SVG export V2 failed: {e}")
+
+    try:
+        # Fallback to original reliable method
         from reliable_svg_export import reliable_svg_export
         result_path = reliable_svg_export(str(html_path_abs), str(output_svg_abs))
-        print(f"[DEBUG] Reliable SVG export completed: {result_path}")
+        print(f"[DEBUG] Original reliable SVG export completed: {result_path}")
         return result_path
     except Exception as e:
-        print(f"[ERROR] Reliable SVG export failed: {e}")
-        # Fallback to original method as last resort
+        print(f"[ERROR] Original reliable SVG export failed: {e}")
+        # Last resort fallback to original method
         try:
             script_path = Path(__file__).parent.parent.parent / 'export_infographic_svg.py'
             script_path = script_path.resolve()
@@ -36,7 +48,7 @@ def save_infographic_as_svg(html_path, output_svg=None):
             ], check=True)
             return str(output_svg_abs)
         except Exception as e2:
-            print(f"[ERROR] Fallback SVG export also failed: {e2}")
+            print(f"[ERROR] All SVG export methods failed: {e2}")
             raise e
 
 

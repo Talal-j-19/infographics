@@ -69,24 +69,15 @@ def get_d3_code_parallel_variant(prompt, variant_id=0, style_variant=None):
                 "Text labels, section titles, and formulas must not overlap with each other or with diagram elements. Adjust font size, wrapping, or positioning as needed to ensure clarity and no overflow. "
                 "If there is not enough space, reduce the number of elements, use smaller fonts, or create a more compact layout, but never let text go outside the canvas or overlap."
             )
-            # Add variant-specific approach and styling
-            variant_approaches = [
-                "process flow with step-by-step progression",
-                "data visualization with charts and metrics",
-                "conceptual mapping with relationships and hierarchy"
-            ]
-
-            current_style = style_variant if style_variant else variant_approaches[variant_id % len(variant_approaches)]
-            approach_info = prompt.get('approach', {})
+            # Simple variant instruction - let LLM be creative
+            current_style = style_variant if style_variant else "unique and creative design"
 
             user_prompt = (
                 f"Topic: {prompt.get('topic', '')}\n"
                 f"Elements: {prompt.get('elements', '')}\n"
-                f"Unique Approach: {approach_info.get('focus', 'general approach')}\n"
-                f"Visual Style: {approach_info.get('style', current_style)}\n"
-                f"Emphasis: {approach_info.get('emphasis', 'comprehensive coverage')}\n"
-                f"Variant ID: {variant_id} (make this completely different from other variants)\n"
-                f"IMPORTANT: Create a unique infographic that uses a different visual approach, layout, and information presentation than typical infographics on this topic.\n"
+                f"Style: {current_style}\n"
+                f"Variant: This is variant {variant_id+1} of 3 - make it unique and different\n"
+                f"Instructions: Create a creative and original infographic. Be innovative with the layout and presentation.\n"
                 f"{prompt.get('task', '')}"
             )
             model_with_system = genai.GenerativeModel(

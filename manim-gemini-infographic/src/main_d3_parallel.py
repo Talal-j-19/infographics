@@ -40,33 +40,12 @@ def generate_single_variant(topic, variant_id, variant_manager, style_variant=No
         file_paths = variant_manager.get_file_paths()
         code_file = str(file_paths['html'])
 
-        # Step 1: Get UNIQUE elements for each variant with different approaches
-        print(f"🔍 [Variant {variant_id+1}] Getting unique elements from Gemini API...")
-
-        # Define different approaches for each variant
-        variant_approaches = [
-            {
-                "focus": "step-by-step process flow with detailed stages",
-                "style": "flowchart and process diagrams",
-                "emphasis": "sequential workflow and timeline"
-            },
-            {
-                "focus": "comparative analysis and key statistics",
-                "style": "charts, graphs, and data visualization",
-                "emphasis": "metrics, comparisons, and quantitative data"
-            },
-            {
-                "focus": "conceptual overview and relationships",
-                "style": "mind maps, hierarchical structures, and connections",
-                "emphasis": "concepts, relationships, and big picture view"
-            }
-        ]
-
-        current_approach = variant_approaches[variant_id % len(variant_approaches)]
+        # Step 1: Get elements for each variant with simple variation instruction
+        print(f"🔍 [Variant {variant_id+1}] Getting elements from Gemini API...")
 
         elements_prompt = {
             "topic": topic,
-            "task": f"Create a UNIQUE infographic approach for '{topic}' with focus on {current_approach['focus']}. Use {current_approach['style']} and emphasize {current_approach['emphasis']}. Make this completely different from other typical infographics on this topic. Return as a JSON list of element descriptions that are specific to this approach. Do not include code or explanations."
+            "task": f"List the key visual/text elements needed to make a single-frame D3.js infographic for this topic. Create a unique and creative approach - make this infographic different from typical ones. Variant {variant_id+1} of 3 - be creative and original. Return as a JSON list of element descriptions. Do not include code or explanations."
         }
         elements_response = get_d3_code_single_frame(elements_prompt)
         try:
@@ -78,13 +57,12 @@ def generate_single_variant(topic, variant_id, variant_manager, style_variant=No
             print(f"⚠️ [Variant {variant_id+1}] Could not parse elements as JSON: {e}")
             elements = elements_response  # Use raw response as fallback
         
-        # Step 2: Generate D3.js code with unique approach and styling
-        print(f"⚙️ [Variant {variant_id+1}] Generating unique D3.js code...")
+        # Step 2: Generate D3.js code with simple variation instruction
+        print(f"⚙️ [Variant {variant_id+1}] Generating D3.js code...")
         code_prompt_obj = {
-            "task": f"Generate D3.js code for the given elements with focus on {current_approach['focus']}. Create a {current_approach['style']} that emphasizes {current_approach['emphasis']}. Make this infographic completely unique and different from typical approaches.",
+            "task": f"Generate D3.js code for the given elements. Create a unique and creative infographic - make this different from typical approaches. This is variant {variant_id+1} of 3, so be original and creative.",
             "topic": topic,
-            "elements": elements,
-            "approach": current_approach
+            "elements": elements
         }
         d3_code = get_d3_code_parallel_variant(code_prompt_obj, variant_id, style_variant)
         
@@ -166,11 +144,11 @@ def main():
         job_manager = ParallelInfographicJobManager()
         batch_id, batch_dir, variant_managers = job_manager.create_batch_job(topic)
         
-        # Define style variants that complement the different approaches
+        # Define simple style variants - let LLM be creative
         style_variants = [
-            "clean process flow design with step indicators and arrows",
-            "data-driven visualization with charts and statistical elements",
-            "conceptual diagram style with hierarchical layouts and connections"
+            "creative and unique design approach",
+            "innovative visualization style",
+            "original and distinctive layout"
         ]
         
         # Start parallel generation
