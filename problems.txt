@@ -1,0 +1,1 @@
+it uses absolute paths in svg export

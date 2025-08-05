@@ -187,13 +187,20 @@ def method_2_chrome_download_button(html_file, output_svg):
             const blob = new Blob([svgString], {type: 'image/svg+xml'});
             const url = URL.createObjectURL(blob);
 
+            // Create unique filename based on current timestamp and variant
+            const timestamp = Date.now();
+            const filename = `infographic_${timestamp}_${Math.random().toString(36).substr(2, 9)}.svg`;
+
             const a = document.createElement('a');
             a.href = url;
-            a.download = 'infographic.svg';
+            a.download = filename;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
+
+            // Store filename for retrieval
+            window.downloadedFilename = filename;
         }
 
         // Auto-download after rendering
@@ -224,33 +231,106 @@ def method_2_chrome_download_button(html_file, output_svg):
         
         # Wait for user to download
         print("[Method 2] Waiting 30 seconds for download...")
+
+        # Clear any old infographic SVG files from Downloads first
+        downloads_folder = Path.home() / 'Downloads'
+        old_files = list(downloads_folder.glob('infographic*.svg'))
+        for old_file in old_files:
+            try:
+                # Only delete files older than 1 minute to avoid conflicts
+                if time.time() - old_file.stat().st_mtime > 60:
+                    old_file.unlink()
+                    print(f"[Method 2] Cleaned up old file: {old_file.name}")
+            except:
+                pass
+
         time.sleep(30)
-        
+
         # Clean up temp file
         try:
             temp_html.unlink()
         except:
             pass
-        
-        # Check if file was downloaded (this is a manual process)
-        downloads_folder = Path.home() / 'Downloads'
+
+        # Check if file was downloaded - look for newest infographic SVG
         possible_files = list(downloads_folder.glob('infographic*.svg'))
-        
+
         if possible_files:
-            latest_file = max(possible_files, key=lambda p: p.stat().st_mtime)
-            shutil.copy2(latest_file, output_svg)
-            print(f"[Method 2] Found and copied downloaded SVG: {output_svg}")
-            return True
-        else:
-            print("[Method 2] No downloaded SVG file found")
-            return False
+            # Get the most recently created file
+            latest_file = max(possible_files, key=lambda p: p.stat().st_ctime)
+
+            # Verify it was created recently (within last 35 seconds)
+            if time.time() - latest_file.stat().st_ctime < 35:
+                shutil.copy2(latest_file, output_svg)
+                print(f"[Method 2] Found and copied downloaded SVG: {latest_file.name} -> {output_svg}")
+
+                # Clean up the downloaded file
+                try:
+                    latest_file.unlink()
+                    print(f"[Method 2] Cleaned up downloaded file: {latest_file.name}")
+                except:
+                    pass
+
+                return True
+            else:
+                print(f"[Method 2] Found SVG but it's too old: {latest_file.name}")
+
+        print("[Method 2] No recent downloaded SVG file found")
+        return False
             
     except Exception as e:
         print(f"[Method 2] Chrome download method failed: {e}")
         return False
 
 
-def method_3_fallback_copy(html_file, output_svg):
+def method_1_simple_auto_download(html_file, output_svg):
+    """Method 1: Improved download - Waits for D3.js completion, validates SVG!"""
+    try:
+        print("[Method 1] Using improved download with D3.js validation...")
+
+        # Import and use the improved function
+        from improved_download import improved_download_svg
+        return improved_download_svg(html_file, output_svg)
+
+    except Exception as e:
+        print(f"[Method 1] Improved download failed: {e}")
+        return False
+
+
+def method_2_robust_chrome_download(html_file, output_svg):
+    """Method 2: Use robust Chrome download with local D3.js and error handling"""
+    try:
+        print("[Method 2] Using robust Chrome download...")
+
+        # Import and use the robust export function
+        from robust_svg_export import robust_svg_export
+        return robust_svg_export(html_file, output_svg)
+
+    except Exception as e:
+        print(f"[Method 2] Robust Chrome download failed: {e}")
+        return False
+
+
+def method_3_puppeteer_export(html_file, output_svg):
+    """Method 3: Use Puppeteer for SVG export"""
+    return method_1_puppeteer_export(html_file, output_svg)
+
+
+def method_4_isolated_chrome_download(html_file, output_svg):
+    """Method 4: Use isolated Chrome download to prevent cross-contamination"""
+    try:
+        print("[Method 4] Using isolated Chrome download...")
+
+        # Import and use the isolated export function
+        from isolated_svg_export import isolated_svg_export
+        return isolated_svg_export(html_file, output_svg)
+
+    except Exception as e:
+        print(f"[Method 4] Isolated Chrome download failed: {e}")
+        return False
+
+
+def method_5_fallback_copy(html_file, output_svg):
     """Method 3: Copy existing SVG if available"""
     try:
         print("[Method 3] Looking for existing SVG files...")
@@ -322,66 +402,68 @@ def create_emergency_fallback_svg(html_file, output_svg):
 
 
 def fix_svg_styles(svg_file, html_file):
-    """Post-process SVG to add missing styles from HTML"""
+    """Post-process SVG to add missing styles from HTML - PROPERLY EMBEDDED"""
     try:
-        print(f"[Fix] Adding styles to SVG: {svg_file}")
+        print(f"[Fix] Checking SVG structure: {svg_file}")
 
         # Read SVG content
         with open(svg_file, 'r', encoding='utf-8') as f:
             svg_content = f.read()
 
-        # Read HTML to extract styles
-        with open(html_file, 'r', encoding='utf-8') as f:
-            html_content = f.read()
+        # Check if SVG is properly formatted
+        if not svg_content.strip().startswith('<?xml'):
+            print("[Fix] Adding XML declaration")
+            svg_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg_content
 
-        # Extract CSS from HTML
-        from bs4 import BeautifulSoup
-        soup = BeautifulSoup(html_content, 'html.parser')
-        css_styles = []
-        for style_tag in soup.find_all('style'):
-            css_styles.append(style_tag.get_text())
+        # Ensure proper namespace
+        if 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
+            print("[Fix] Adding SVG namespace")
+            svg_content = svg_content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
 
-        combined_css = '\n'.join(css_styles)
-
-        # Add basic styles if missing
-        if not combined_css.strip():
-            combined_css = '''
-            text { font-family: Arial, sans-serif; fill: #333; }
-            .title { font-size: 24px; font-weight: bold; text-anchor: middle; }
-            .node-text { fill: white; text-anchor: middle; }
-            .node-rect { stroke-width: 1.5px; }
-            .arrow-line { stroke: #777; stroke-width: 2px; fill: none; }
-            '''
-
-        # Check if SVG already has styles
-        if '<style' not in svg_content and combined_css.strip():
-            # Add XML declaration if missing
-            if not svg_content.startswith('<?xml'):
-                svg_content = '<?xml version="1.0" encoding="UTF-8"?>\n' + svg_content
-
-            # Add namespace if missing
-            if 'xmlns="http://www.w3.org/2000/svg"' not in svg_content:
-                svg_content = svg_content.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
-
-            # Insert styles after opening SVG tag
-            style_tag = f'<style type="text/css"><![CDATA[\n{combined_css.strip()}\n]]></style>'
-
-            # Find the end of the opening SVG tag
-            svg_tag_end = svg_content.find('>')
-            if svg_tag_end != -1:
-                svg_content = (svg_content[:svg_tag_end + 1] +
-                             '\n' + style_tag +
-                             svg_content[svg_tag_end + 1:])
-
-            # Save fixed SVG
-            with open(svg_file, 'w', encoding='utf-8') as f:
-                f.write(svg_content)
-
-            print(f"[Fix] Added styles to SVG: {len(combined_css)} chars of CSS")
+        # Check if SVG already has embedded styles
+        if '<style' in svg_content:
+            print("[Fix] SVG already has embedded styles - no changes needed")
             return True
-        else:
-            print("[Fix] SVG already has styles or no styles found")
-            return True
+
+        # Only add basic styles if SVG has no styling at all
+        basic_styles = '''
+        text { font-family: Arial, sans-serif; fill: #333; }
+        .title { font-size: 28px; font-weight: bold; text-anchor: middle; }
+        .node-text { fill: white; text-anchor: middle; }
+        .node-rect { stroke-width: 1.5px; }
+        .arrow-line { stroke: #777; stroke-width: 2px; fill: none; }
+        .path-heading { font-weight: bold; text-anchor: middle; }
+        .characteristic-text { font-weight: bold; }
+        '''
+
+        # Find the SVG opening tag properly
+        svg_start = svg_content.find('<svg')
+        if svg_start == -1:
+            print("[Fix] No SVG element found")
+            return False
+
+        # Find the end of the opening SVG tag
+        svg_tag_end = svg_content.find('>', svg_start)
+        if svg_tag_end == -1:
+            print("[Fix] Malformed SVG opening tag")
+            return False
+
+        # Insert basic styles INSIDE the SVG element, right after the opening tag
+        style_tag = f'<style type="text/css"><![CDATA[\n{basic_styles.strip()}\n]]></style>'
+
+        # Split content: XML declaration + everything before SVG, SVG opening tag, everything after
+        before_svg = svg_content[:svg_tag_end + 1]
+        after_svg = svg_content[svg_tag_end + 1:]
+
+        # Reconstruct with styles inside SVG
+        svg_content = before_svg + '\n' + style_tag + '\n' + after_svg
+
+        # Save fixed SVG
+        with open(svg_file, 'w', encoding='utf-8') as f:
+            f.write(svg_content)
+
+        print(f"[Fix] Added basic styles inside SVG element")
+        return True
 
     except Exception as e:
         print(f"[Fix] Failed to fix SVG styles: {e}")
@@ -401,11 +483,13 @@ def reliable_svg_export_v2(html_file, output_svg):
 
     print(f"[V2] Starting reliable SVG export: {html_file} -> {output_svg}")
 
-    # Try methods in order of reliability
+    # Try methods in order of reliability (simple approach first)
     methods = [
-        method_1_puppeteer_export,
-        method_2_chrome_download_button,
-        method_3_fallback_copy
+        method_1_simple_auto_download,
+        method_2_robust_chrome_download,
+        method_3_puppeteer_export,
+        method_4_isolated_chrome_download,
+        method_5_fallback_copy
     ]
 
     for i, method in enumerate(methods, 1):

@@ -87,8 +87,14 @@ def generate_single_variant(topic, variant_id, variant_manager, style_variant=No
             print(f"❌ [Variant {variant_id+1}] PNG export failed: {e}")
             png_path = None
         
-        # Step 6: Export SVG
+        # Step 6: Export SVG (with staggered delay to prevent browser conflicts)
         try:
+            # Add delay based on variant ID to prevent browser conflicts
+            delay_seconds = variant_id * 10  # 0, 10, 20 seconds delay
+            if delay_seconds > 0:
+                print(f"⏳ [Variant {variant_id+1}] Waiting {delay_seconds}s before SVG export...")
+                time.sleep(delay_seconds)
+
             print(f"🎨 [Variant {variant_id+1}] Exporting SVG...")
             svg_path = save_infographic_as_svg(code_file, str(file_paths['svg']))
             print(f"✅ [Variant {variant_id+1}] SVG saved to: {svg_path}")
