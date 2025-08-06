@@ -47,3 +47,9 @@ Thumbs.db
 
 #rag data
 manim_rag_db/
+
+
+generated/
+
+
+node_modules/
