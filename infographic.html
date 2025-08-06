@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>The Programming Language Constellation</title>
+  <style>
+    /* Responsive infographic styles */
+    body {
+      margin: 0;
+      padding: 20px;
+      box-sizing: border-box;
+      background-color: #f5f5f5;
+      overflow-x: auto;
+    }
+
+    svg {
+      max-width: 100%;
+      max-height: 90vh;
+      display: block;
+      margin: 0 auto;
+      background-color: white;
+      border: 1px solid #ddd;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    svg[viewBox] {
+      width: auto;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="d3-infographic"></div>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const infographicElements = [
+    {
+      "type": "text",
+      "id": "infographic-title",
+      "text_content": "The Programming Language Constellation",
+      "x": 500,
+      "y": 60,
+      "font_size": "32px",
+      "font_weight": "bold",
+      "text_anchor": "middle",
+      "fill": "#333"
+    },
+    {
+      "type": "text",
+      "id": "infographic-subtitle",
+      "text_content": "Navigating the diverse universe of coding paradigms.",
+      "x": 500,
+      "y": 95,
+      "font_size": "18px",
+      "text_anchor": "middle",
+      "fill": "#555"
+    },
+    {
+      "type": "circle",
+      "id": "central-core-node",
+      "cx": 500,
+      "cy": 400,
+      "r": 50,
+      "fill": "#e6f2ff",
+      "stroke": "#aaddff",
+      "stroke_width": 2
+    },
+    {
+      "type": "text",
+      "id": "central-core-text",
+      "text_content": "Fundamental Concepts",
+      "x": 500,
+      "y": 405,
+      "font_size": "14px",
+      "font_weight": "bold",
+      "text_anchor": "middle",
+      "fill": "#0066cc"
+    },
+    {
+      "type": "path",
+      "id": "core-to-low-level",
+      "d": "M500,400 Q370,300 240,215", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "low-level-constellation",
+      "class": "language-constellation",
+      "transform": "translate(200, 200)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "low-level-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#fff0e6",
+          "stroke": "#ffcc99",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "low-level-title",
+          "text_content": "Low-Level Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#cc6600"
+        },
+        {
+          "type": "circle",
+          "id": "assembly-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffd7a3",
+          "stroke": "#cc6600",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "assembly-label",
+          "text_content": "Assembly",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "c-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffd7a3",
+          "stroke": "#cc6600",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "c-label",
+          "text_content": "C",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "path",
+      "id": "core-to-imperative",
+      "d": "M500,400 Q350,400 190,415", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "imperative-constellation",
+      "class": "language-constellation",
+      "transform": "translate(150, 400)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "imperative-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#e6ffe6",
+          "stroke": "#99ff99",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "imperative-title",
+          "text_content": "Imperative Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#009900"
+        },
+        {
+          "type": "circle",
+          "id": "java-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#d7ffcc",
+          "stroke": "#009900",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "java-label",
+          "text_content": "Java",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "csharp-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#d7ffcc",
+          "stroke": "#009900",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "csharp-label",
+          "text_content": "C#",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "path",
+      "id": "core-to-object-oriented",
+      "d": "M500,400 Q370,500 290,615", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "object-oriented-constellation",
+      "class": "language-constellation",
+      "transform": "translate(250, 600)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "object-oriented-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#e6f2ff",
+          "stroke": "#99ccff",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "object-oriented-title",
+          "text_content": "Object-Oriented Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#0066cc"
+        },
+        {
+          "type": "circle",
+          "id": "smalltalk-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ccedff",
+          "stroke": "#0066cc",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "smalltalk-label",
+          "text_content": "Smalltalk",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "cpp-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ccedff",
+          "stroke": "#0066cc",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "cpp-label",
+          "text_content": "C++",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "path",
+      "id": "core-to-declarative",
+      "d": "M500,400 Q630,500 790,615", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "declarative-constellation",
+      "class": "language-constellation",
+      "transform": "translate(750, 600)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "declarative-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#e6e6ff",
+          "stroke": "#9999ff",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "declarative-title",
+          "text_content": "Declarative Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#3300cc"
+        },
+        {
+          "type": "circle",
+          "id": "sql-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ccb3ff",
+          "stroke": "#3300cc",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "sql-label",
+          "text_content": "SQL",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "prolog-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ccb3ff",
+          "stroke": "#3300cc",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "prolog-label",
+          "text_content": "Prolog",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "path",
+      "id": "core-to-functional",
+      "d": "M500,400 Q630,300 840,215", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "functional-constellation",
+      "class": "language-constellation",
+      "transform": "translate(800, 200)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "functional-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#ffe6e6",
+          "stroke": "#ff9999",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "functional-title",
+          "text_content": "Functional Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#cc0000"
+        },
+        {
+          "type": "circle",
+          "id": "haskell-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffcccc",
+          "stroke": "#cc0000",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "haskell-label",
+          "text_content": "Haskell",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "lisp-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffcccc",
+          "stroke": "#cc0000",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "lisp-label",
+          "text_content": "Lisp",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "path",
+      "id": "core-to-scripting",
+      "d": "M500,400 Q650,400 890,415", // Adjusted end point for new group position
+      "stroke": "#999",
+      "stroke_width": 1,
+      "fill": "none"
+    },
+    {
+      "type": "g",
+      "id": "scripting-constellation",
+      "class": "language-constellation",
+      "transform": "translate(850, 400)", // Adjusted for layout
+      "children": [
+        {
+          "type": "rect",
+          "id": "scripting-bg",
+          "x": -60,
+          "y": -50,
+          "width": 200,
+          "height": 130,
+          "rx": 10,
+          "ry": 10,
+          "fill": "#ffffcc",
+          "stroke": "#ffcc66",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "scripting-title",
+          "text_content": "Scripting Paradigm",
+          "x": 40,
+          "y": -20,
+          "font_size": "16px",
+          "font_weight": "bold",
+          "text_anchor": "middle",
+          "fill": "#cc9900"
+        },
+        {
+          "type": "circle",
+          "id": "ruby-star",
+          "cx": 0,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffe080",
+          "stroke": "#cc9900",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "ruby-label",
+          "text_content": "Ruby",
+          "x": 0,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        },
+        {
+          "type": "circle",
+          "id": "php-star",
+          "cx": 80,
+          "cy": 20,
+          "r": 15,
+          "fill": "#ffe080",
+          "stroke": "#cc9900",
+          "stroke_width": 1
+        },
+        {
+          "type": "text",
+          "id": "php-label",
+          "text_content": "PHP",
+          "x": 80,
+          "y": 60,
+          "font_size": "12px",
+          "text_anchor": "middle",
+          "fill": "#333"
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "multi-paradigm-label",
+      "text_content": "Multi-Paradigm Languages:",
+      "x": 500,
+      "y": 700, // Adjusted for layout
+      "font_size": "14px", // Adjusted for space
+      "font_weight": "bold",
+      "text_anchor": "middle",
+      "fill": "#663399"
+    },
+    {
+      "type": "circle",
+      "id": "python-star-multi",
+      "cx": 420, // Adjusted for layout
+      "cy": 730, // Adjusted for layout
+      "r": 15, // Adjusted for space
+      "fill": "#e0ccff",
+      "stroke": "#663399",
+      "stroke_width": 1
+    },
+    {
+      "type": "text",
+      "id": "python-label-multi",
+      "text_content": "Python",
+      "x": 420, // Adjusted for layout
+      "y": 755, // Adjusted for layout (730 + 15 + text_margin)
+      "font_size": "13px",
+      "text_anchor": "middle",
+      "fill": "#333"
+    },
+    {
+      "type": "circle",
+      "id": "javascript-star-multi",
+      "cx": 580, // Adjusted for layout
+      "cy": 730, // Adjusted for layout
+      "r": 15, // Adjusted for space
+      "fill": "#e0ccff",
+      "stroke": "#663399",
+      "stroke_width": 1
+    },
+    {
+      "type": "text",
+      "id": "javascript-label-multi",
+      "text_content": "JavaScript",
+      "x": 580, // Adjusted for layout
+      "y": 755, // Adjusted for layout
+      "font_size": "13px",
+      "text_anchor": "middle",
+      "fill": "#333"
+    },
+    {
+      "type": "line",
+      "id": "py-to-imp",
+      "x1": 420, "y1": 730, // From Python
+      "x2": 190, "y2": 415, // To Imperative group center
+      "stroke": "#663399",
+      "stroke_dasharray": "4 2",
+      "stroke_width": 1
+    },
+    {
+      "type": "line",
+      "id": "py-to-oo",
+      "x1": 420, "y1": 730, // From Python
+      "x2": 290, "y2": 615, // To Object-Oriented group center
+      "stroke": "#663399",
+      "stroke_dasharray": "4 2",
+      "stroke_width": 1
+    },
+    {
+      "type": "line",
+      "id": "js-to-script",
+      "x1": 580, "y1": 730, // From JavaScript
+      "x2": 890, "y2": 415, // To Scripting group center
+      "stroke": "#663399",
+      "stroke_dasharray": "4 2",
+      "stroke_width": 1
+    },
+    {
+      "type": "line",
+      "id": "js-to-func",
+      "x1": 580, "y1": 730, // From JavaScript
+      "x2": 840, "y2": 215, // To Functional group center
+      "stroke": "#663399",
+      "stroke_dasharray": "4 2",
+      "stroke_width": 1
+    },
+    {
+      "type": "line",
+      "id": "js-to-decl",
+      "x1": 580, "y1": 730, // From JavaScript
+      "x2": 790, "y2": 615, // To Declarative group center
+      "stroke": "#663399",
+      "stroke_dasharray": "4 2",
+      "stroke_width": 1
+    },
+    {
+      "type": "text",
+      "id": "footer-note",
+      "text_content": "Note: Paradigms often overlap, and many languages support multiple styles.",
+      "x": 500,
+      "y": 785, // Adjusted for layout
+      "font_size": "12px", // Adjusted for space
+      "text_anchor": "middle",
+      "fill": "#888"
+    }
+  ];
+
+
+      // Due to character limit here, I cannot paste the whole array again.
+      // Paste your entire "infographicElements" array from your original message in place of the /* PLACEHOLDER */ comment.
+
+      const width = 1000;
+      const height = 800;
+
+      const svg = d3.select("#d3-infographic")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("font-family", "Arial, sans-serif");
+
+      infographicElements.forEach(element => {
+        if (element.type === "g") {
+          const g = svg.append("g")
+            .attr("id", element.id)
+            .attr("transform", element.transform);
+          if (element.class) g.attr("class", element.class);
+          element.children.forEach(child => {
+            if (child.type === "rect") {
+              g.append("rect")
+                .attr("id", child.id)
+                .attr("x", child.x)
+                .attr("y", child.y)
+                .attr("width", child.width)
+                .attr("height", child.height)
+                .attr("rx", child.rx)
+                .attr("ry", child.ry)
+                .attr("fill", child.fill)
+                .attr("stroke", child.stroke)
+                .attr("stroke-width", child.stroke_width);
+            } else if (child.type === "circle") {
+              g.append("circle")
+                .attr("id", child.id)
+                .attr("cx", child.cx)
+                .attr("cy", child.cy)
+                .attr("r", child.r)
+                .attr("fill", child.fill)
+                .attr("stroke", child.stroke)
+                .attr("stroke-width", child.stroke_width);
+            } else if (child.type === "text") {
+              g.append("text")
+                .attr("id", child.id)
+                .attr("x", child.x)
+                .attr("y", child.y)
+                .attr("font-size", child.font_size)
+                .attr("font-weight", child.font_weight || "normal")
+                .attr("text-anchor", child.text_anchor || "start")
+                .attr("fill", child.fill)
+                .text(child.text_content);
+            }
+          });
+        } else if (element.type === "circle") {
+          svg.append("circle")
+            .attr("id", element.id)
+            .attr("cx", element.cx)
+            .attr("cy", element.cy)
+            .attr("r", element.r)
+            .attr("fill", element.fill)
+            .attr("stroke", element.stroke)
+            .attr("stroke-width", element.stroke_width);
+        } else if (element.type === "text") {
+          svg.append("text")
+            .attr("id", element.id)
+            .attr("x", element.x)
+            .attr("y", element.y)
+            .attr("font-size", element.font_size)
+            .attr("font-weight", element.font_weight || "normal")
+            .attr("text-anchor", element.text_anchor || "start")
+            .attr("fill", element.fill)
+            .text(element.text_content);
+        } else if (element.type === "path") {
+          svg.append("path")
+            .attr("id", element.id)
+            .attr("d", element.d)
+            .attr("stroke", element.stroke)
+            .attr("stroke-width", element.stroke_width)
+            .attr("fill", element.fill)
+            .attr("stroke-dasharray", element.stroke_dasharray || "none");
+        } else if (element.type === "line") {
+          svg.append("line")
+            .attr("id", element.id)
+            .attr("x1", element.x1)
+            .attr("y1", element.y1)
+            .attr("x2", element.x2)
+            .attr("y2", element.y2)
+            .attr("stroke", element.stroke)
+            .attr("stroke-width", element.stroke_width)
+            .attr("stroke-dasharray", element.stroke_dasharray || "none");
+        }
+      });
+    });
+  </script>
+</body>
+</html>
